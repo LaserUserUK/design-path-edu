@@ -26,6 +26,7 @@
 #include "preferences.h"
 #include "pattern-manager.h"
 #include "pattern-manipulation.h"
+#include "renderer/surface-texture.h"
 #include "ui/builder-utils.h"
 #include "ui/monitor.h"
 #include "ui/util.h"
@@ -229,7 +230,7 @@ void PatternEditor::bind_store(Gtk::FlowBox& list, PatternStore& pat) {
 
     list.bind_list_store(pat.store.get_store(), [&pat, this](const Glib::RefPtr<PatternItem>& item){
         auto const box = Gtk::make_managed<Box>(Gtk::Orientation::VERTICAL);
-        auto const image = Gtk::make_managed<Gtk::Image>(to_texture(item->pix));
+        auto const image = Gtk::make_managed<Gtk::Image>(Renderer::build_texture(item->pix));
         image->set_size_request(_tile_size, _tile_size);
         image->set_pixel_size(_tile_size);
         box->append(*image);
@@ -534,7 +535,7 @@ void PatternEditor::set_active(Gtk::FlowBox& gallery, PatternStore& pat, Glib::R
                             for_each_descendant(*box, [&](Widget &widget){
                                 if (auto const image = dynamic_cast<Gtk::Image *>(&widget)) {
                                     image->set_pixel_size(_tile_size);
-                                    image->set(to_texture(item->pix));
+                                    image->set(Renderer::build_texture(item->pix));
                                     return ForEachResult::_break;
                                 }
                                 return ForEachResult::_continue;
