@@ -13,7 +13,7 @@
       modifiers <primary>, <shift>, and/or <alt>. As this is an XML file, '<' and '>' must be
       replaced by &lt; and &gt;, respectively. The first entry will be listed in menus.
     
-    - The "gaction" atribute contains the full action name, including the map name (typically
+    - The "gaction" attribute contains the full action name, including the map name (typically
       'app' or 'win').
     
     =========== Notes ===========
