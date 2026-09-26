@@ -41,6 +41,7 @@
 #include "ui/widget/canvas.h"
 #include "ui/widget/desktop-widget.h"
 #include "ui/widget/textpath-popover.h"
+#include "ui/modifiers.h"
 
 class RectKnotHolder : public KnotHolder {
 public:
@@ -231,9 +232,14 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_grabbed(Geom::Point const & grab_position, unsigned state) override;
 
+    std::string get_mod_label() const {
+        return mod_trans_confine->get_label();
+    }
+
 private:
     void set_internal(Geom::Point const &opposite_of_the_opposite_point);
     Geom::Point initial_opposite_XY;
+    Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
 };
 
 /* handle for position */
@@ -504,7 +510,7 @@ RectKnotHolderEntityXY::knot_set(Geom::Point const &p, Geom::Point const &origin
 
     Geom::Point s = p;
     gdouble opposite_of_opposite_X, opposite_of_opposite_Y;
-    if (state & GDK_CONTROL_MASK) {
+    if (mod_trans_confine->active(state)) {
         // original width/height when drag started
         gdouble w_orig = initial_opposite_XY.x() - origin[Geom::X];
         gdouble h_orig = initial_opposite_XY.y() - origin[Geom::Y];
@@ -633,8 +639,8 @@ RectKnotHolder::RectKnotHolder(SPDesktop *desktop, SPItem *item)
                         "to lock ratio or stretch in one dimension only"));
 
     entity_xy->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Rect:xy",
-                      _("Adjust the <b>width and height</b> of the rectangle; with <b>Ctrl</b> "
-                        "to lock ratio or stretch in one dimension only"));
+                      _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_xy->get_mod_label() + "</b> "
+                        "to lock ratio or stretch in one dimension only").c_str()));
 
     entity_center->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_MARKER, "Rect:center",
                           _("Drag to move the rectangle"));
