@@ -216,12 +216,17 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_grabbed(Geom::Point const & grab_position, unsigned state) override;
 
+    std::string get_mod_label() const {
+        return mod_trans_confine->get_label();
+    }
+
 protected:
     void set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state);
     void set_internal(Geom::Point const &opposite_point);
 
 private:
     Geom::Point initialXY;
+    Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
 };
 
 /* handle for x/y adjustment */
@@ -386,7 +391,7 @@ RectKnotHolderEntityWH::set_internal(Geom::Point const &p, Geom::Point const &or
 
     Geom::Point s = p;
 
-    if (state & GDK_CONTROL_MASK) {
+    if (mod_trans_confine->active(state)) {
         // original width/height when drag started
         gdouble const w_orig = (origin[Geom::X] - initialXY.x());
         gdouble const h_orig = (origin[Geom::Y] - initialXY.y());
@@ -635,8 +640,8 @@ RectKnotHolder::RectKnotHolder(SPDesktop *desktop, SPItem *item)
                         "to make the horizontal radius the same"));
 
     entity_wh->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Rect:wh",
-                      _("Adjust the <b>width and height</b> of the rectangle; with <b>Ctrl</b> "
-                        "to lock ratio or stretch in one dimension only"));
+                      _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_wh->get_mod_label() + "</b> "
+                        "to lock ratio or stretch in one dimension only").c_str()));
 
     entity_xy->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Rect:xy",
                       _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_xy->get_mod_label() + "</b> "
