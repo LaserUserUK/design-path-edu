@@ -197,6 +197,13 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+    std::string get_mod_label() const {
+        return mod_trans_confine->get_label();
+    }
+
+protected:
+    Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
 };
 
 /* handle for vertical rounding radius */
@@ -206,6 +213,13 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+    std::string get_mod_label() const {
+        return mod_trans_confine->get_label();
+    }
+
+protected:
+    Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
 };
 
 /* handle for width/height adjustment */
@@ -275,7 +289,7 @@ RectKnotHolderEntityRX::knot_set(Geom::Point const &p, Geom::Point const &/*orig
     //the radius then we should have a constrained snap. snap_knot_position() is unconstrained
     Geom::Point const s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(Geom::Point(rect->x.computed + rect->width.computed, rect->y.computed), Geom::Point(-1, 0)), state);
 
-    if (state & GDK_CONTROL_MASK) {
+    if (mod_trans_confine->active(state)) {
         gdouble temp = MIN(rect->height.computed, rect->width.computed) / 2.0;
         rect->rx = rect->ry = CLAMP(rect->x.computed + rect->width.computed - s[Geom::X], 0.0, temp);
     } else {
@@ -297,7 +311,7 @@ RectKnotHolderEntityRX::knot_click(unsigned int state)
         /* remove rounding from rectangle */
         rect->getRepr()->removeAttribute("rx");
         rect->getRepr()->removeAttribute("ry");
-    } else if (state & GDK_CONTROL_MASK) {
+    } else if (mod_trans_confine->active(state)) {
         /* Ctrl-click sets the vertical rounding to be the same as the horizontal */
         rect->getRepr()->setAttribute("ry", rect->getRepr()->attribute("rx"));
     }
@@ -324,7 +338,7 @@ RectKnotHolderEntityRY::knot_set(Geom::Point const &p, Geom::Point const &/*orig
     //the radius then we should have a constrained snap. snap_knot_position() is unconstrained
     Geom::Point const s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(Geom::Point(rect->x.computed + rect->width.computed, rect->y.computed), Geom::Point(0, 1)), state);
 
-    if (state & GDK_CONTROL_MASK) { // When holding control then rx will be kept equal to ry,
+    if (mod_trans_confine->active(state)) { // When holding control then rx will be kept equal to ry,
                                     // resulting in a perfect circle (and not an ellipse)
         gdouble temp = MIN(rect->height.computed, rect->width.computed) / 2.0;
         rect->rx = rect->ry = CLAMP(s[Geom::Y] - rect->y.computed, 0.0, temp);
@@ -355,7 +369,7 @@ RectKnotHolderEntityRY::knot_click(unsigned int state)
         /* remove rounding */
         rect->getRepr()->removeAttribute("rx");
         rect->getRepr()->removeAttribute("ry");
-    } else if (state & GDK_CONTROL_MASK) {
+    } else if (mod_trans_confine->active(state)) {
         /* Ctrl-click sets the vertical rounding to be the same as the horizontal */
         rect->getRepr()->setAttribute("rx", rect->getRepr()->attribute("ry"));
     }
@@ -632,12 +646,12 @@ RectKnotHolder::RectKnotHolder(SPDesktop *desktop, SPItem *item)
     RectKnotHolderEntityCenter *entity_center = new RectKnotHolderEntityCenter();
 
     entity_rx->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_ROTATE, "Rect:rx",
-                      _("Adjust the <b>horizontal rounding</b> radius; with <b>Ctrl</b> "
-                        "to make the vertical radius the same"));
+                      _(("Adjust the <b>horizontal rounding</b> radius; with <b>" + entity_rx->get_mod_label() + "</b> "
+                        "to make the vertical radius the same").c_str()));
 
     entity_ry->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_ROTATE, "Rect:ry",
-                      _("Adjust the <b>vertical rounding</b> radius; with <b>Ctrl</b> "
-                        "to make the horizontal radius the same"));
+                      _(("Adjust the <b>vertical rounding</b> radius; with <b>" + entity_ry->get_mod_label() + "</b> "
+                        "to make the horizontal radius the same").c_str()));
 
     entity_wh->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Rect:wh",
                       _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_wh->get_mod_label() + "</b> "
