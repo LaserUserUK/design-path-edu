@@ -17,7 +17,6 @@
 #include <iomanip>
 #include <glibmm/i18n.h>
 
-#include "path/path-curve.h"
 #include "knot/knot.h"
 #include "livarot/Path.h"
 #include "live_effects/effect.h"
@@ -31,17 +30,18 @@
 #include "object/sp-spiral.h"
 #include "object/sp-star.h"
 #include "object/sp-textpath.h"
+#include "path/path-curve.h"
 #include "style.h"
 #include "svg/css-ostringstream.h"
 #include "ui/icon-names.h"
 #include "ui/knot/knot-holder-entity.h"
 #include "ui/knot/knot-holder.h"
+#include "ui/modifiers.h"
 #include "ui/popup-menu.h"
 #include "ui/widget/canvas-grid.h"
 #include "ui/widget/canvas.h"
 #include "ui/widget/desktop-widget.h"
 #include "ui/widget/textpath-popover.h"
-#include "ui/modifiers.h"
 
 class RectKnotHolder : public KnotHolder {
 public:
@@ -198,9 +198,7 @@ public:
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
 
-    std::string get_mod_label() const {
-        return mod_trans_confine->get_label();
-    }
+    std::string get_mod_label() const { return mod_trans_confine->get_label(); }
 
 protected:
     Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
@@ -214,9 +212,7 @@ public:
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
 
-    std::string get_mod_label() const {
-        return mod_trans_confine->get_label();
-    }
+    std::string get_mod_label() const { return mod_trans_confine->get_label(); }
 
 protected:
     Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
@@ -230,9 +226,7 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_grabbed(Geom::Point const & grab_position, unsigned state) override;
 
-    std::string get_mod_label() const {
-        return mod_trans_confine->get_label();
-    }
+    std::string get_mod_label() const { return mod_trans_confine->get_label(); }
 
 protected:
     void set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state);
@@ -251,9 +245,7 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_grabbed(Geom::Point const & grab_position, unsigned state) override;
 
-    std::string get_mod_label() const {
-        return mod_trans_confine->get_label();
-    }
+    std::string get_mod_label() const { return mod_trans_confine->get_label(); }
 
 private:
     void set_internal(Geom::Point const &opposite_of_the_opposite_point);
@@ -315,7 +307,6 @@ RectKnotHolderEntityRX::knot_click(unsigned int state)
         /* Ctrl-click sets the vertical rounding to be the same as the horizontal */
         rect->getRepr()->setAttribute("ry", rect->getRepr()->attribute("rx"));
     }
-
 }
 
 Geom::Point
@@ -339,7 +330,7 @@ RectKnotHolderEntityRY::knot_set(Geom::Point const &p, Geom::Point const &/*orig
     Geom::Point const s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(Geom::Point(rect->x.computed + rect->width.computed, rect->y.computed), Geom::Point(0, 1)), state);
 
     if (mod_trans_confine->active(state)) { // When holding control then rx will be kept equal to ry,
-                                    // resulting in a perfect circle (and not an ellipse)
+                                            // resulting in a perfect circle (and not an ellipse)
         gdouble temp = MIN(rect->height.computed, rect->width.computed) / 2.0;
         rect->rx = rect->ry = CLAMP(s[Geom::Y] - rect->y.computed, 0.0, temp);
     } else {
@@ -646,20 +637,24 @@ RectKnotHolder::RectKnotHolder(SPDesktop *desktop, SPItem *item)
     RectKnotHolderEntityCenter *entity_center = new RectKnotHolderEntityCenter();
 
     entity_rx->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_ROTATE, "Rect:rx",
-                      _(("Adjust the <b>horizontal rounding</b> radius; with <b>" + entity_rx->get_mod_label() + "</b> "
-                        "to make the vertical radius the same").c_str()));
+                      _(("Adjust the <b>horizontal rounding</b> radius; with <b>" + entity_rx->get_mod_label() +
+                         "</b> to make the vertical radius the same")
+                            .c_str()));
 
     entity_ry->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_ROTATE, "Rect:ry",
-                      _(("Adjust the <b>vertical rounding</b> radius; with <b>" + entity_ry->get_mod_label() + "</b> "
-                        "to make the horizontal radius the same").c_str()));
+                      _(("Adjust the <b>vertical rounding</b> radius; with <b>" + entity_ry->get_mod_label() +
+                         "</b> to make the horizontal radius the same")
+                            .c_str()));
 
     entity_wh->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Rect:wh",
-                      _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_wh->get_mod_label() + "</b> "
-                        "to lock ratio or stretch in one dimension only").c_str()));
+                      _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_wh->get_mod_label() +
+                         "</b> to lock ratio or stretch in one dimension only")
+                            .c_str()));
 
     entity_xy->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Rect:xy",
-                      _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_xy->get_mod_label() + "</b> "
-                        "to lock ratio or stretch in one dimension only").c_str()));
+                      _(("Adjust the <b>width and height</b> of the rectangle; with <b>" + entity_xy->get_mod_label() +
+                         "</b> to lock ratio or stretch in one dimension only")
+                            .c_str()));
 
     entity_center->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_MARKER, "Rect:center",
                           _("Drag to move the rectangle"));
