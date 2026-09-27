@@ -56,6 +56,7 @@ ModifierIdToTypeMap const &modifier_type_from_id()
         {"trans-increment", Type::TRANS_INCREMENT},
         {"trans-off-center", Type::TRANS_OFF_CENTER},
         {"trans-snapping", Type::TRANS_NO_SNAPPING}, // name is trans-snapping for historical reasons
+        {"trans-reset-rounding", Type::TRANS_RESET_ROUNDING},
         {"freehand-angle-snapping", Type::FREEHAND_ANGLE_SNAPPING},
         {"freehand-dot", Type::FREEHAND_DOT},
         {"freehand-dot-double", Type::FREEHAND_DOT_DOUBLE},
@@ -163,6 +164,7 @@ Modifier::Container &Modifier::_modifiers()
         make_modifier("trans-increment", _("Transform in increments"), _("Scale, rotate or skew by set increments"), ALT, TRANSFORM, DRAG),
         make_modifier("trans-off-center", _("Transform around center"), _("When scaling, scale selection symmetrically around its rotation center. When rotating/skewing, transform relative to opposite corner/edge."), SHIFT, TRANSFORM, DRAG),
         make_modifier("trans-snapping", _("No Transform Snapping"), _("Disable snapping when transforming object"), SHIFT, TRANSFORM, DRAG),
+        make_modifier("trans-reset-rounding", _("Reset Rounding Transform"), _("Reset the rounding transformation on click"), SHIFT, TRANSFORM, CLICK),
     // Center handle click: seltrans.cpp:734 SHIFT
     // Align handle click: seltrans.cpp:1365 SHIFT
 

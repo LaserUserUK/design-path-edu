@@ -87,6 +87,7 @@ enum class Type {
     TRANS_INCREMENT,      // Scale/Rotate/skew by fixed ratio angles {HANDLE+ALT}
     TRANS_OFF_CENTER,     // Scale/Rotate/skew from opposite corner {HANDLE+SHIFT}
     TRANS_NO_SNAPPING,    // Disable snapping while transforming {HANDLE+SHIFT}
+    TRANS_RESET_ROUNDING, // Reset the rounding transformation {CLICK+SHIFT}
 
     // Some common motions shared by freehand tools
     FREEHAND_ANGLE_SNAPPING, // Use angular snapping {DRAG+CTRL}
