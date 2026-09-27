@@ -36,6 +36,7 @@
 #include "ui/icon-names.h"
 #include "ui/knot/knot-holder-entity.h"
 #include "ui/knot/knot-holder.h"
+#include "ui/modifiers.h"
 #include "ui/popup-menu.h"
 #include "ui/widget/canvas-grid.h"
 #include "ui/widget/canvas.h"
@@ -196,6 +197,9 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+private:
+    Modifiers::Modifier *mod_trans_rounding_reset = Modifiers::Modifier::get(Modifiers::Type::TRANS_RESET_ROUNDING);
 };
 
 /* handle for vertical rounding radius */
@@ -205,6 +209,9 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+private:
+    Modifiers::Modifier *mod_trans_rounding_reset = Modifiers::Modifier::get(Modifiers::Type::TRANS_RESET_ROUNDING);
 };
 
 /* handle for width/height adjustment */
@@ -282,7 +289,7 @@ RectKnotHolderEntityRX::knot_click(unsigned int state)
     auto rect = cast<SPRect>(item);
     g_assert(rect != nullptr);
 
-    if (state & GDK_SHIFT_MASK) {
+    if (mod_trans_rounding_reset->active(state)) {
         /* remove rounding from rectangle */
         rect->getRepr()->removeAttribute("rx");
         rect->getRepr()->removeAttribute("ry");
@@ -340,8 +347,7 @@ RectKnotHolderEntityRY::knot_click(unsigned int state)
     auto rect = cast<SPRect>(item);
     g_assert(rect != nullptr);
 
-    if (state & GDK_SHIFT_MASK) {
-        /* remove rounding */
+    if (mod_trans_rounding_reset->active(state)) {
         rect->getRepr()->removeAttribute("rx");
         rect->getRepr()->removeAttribute("ry");
     } else if (state & GDK_CONTROL_MASK) {
@@ -1420,6 +1426,9 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+private:
+    Modifiers::Modifier *mod_trans_rounding_reset = Modifiers::Modifier::get(Modifiers::Type::TRANS_RESET_ROUNDING);
 };
 
 class ArcKnotHolderEntityEnd : public KnotHolderEntity {
@@ -1428,6 +1437,9 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+private:
+    Modifiers::Modifier *mod_trans_rounding_reset = Modifiers::Modifier::get(Modifiers::Type::TRANS_RESET_ROUNDING);
 };
 
 class ArcKnotHolderEntityRX : public KnotHolderEntity {
@@ -1520,7 +1532,7 @@ ArcKnotHolderEntityStart::knot_click(unsigned int state)
     auto ge = cast<SPGenericEllipse>(item);
     g_assert(ge != nullptr);
 
-    if (state & GDK_SHIFT_MASK) {
+    if (mod_trans_rounding_reset->active(state)) {
         ge->end = ge->start = 0;
         ge->updateRepr();
     }
@@ -1573,7 +1585,7 @@ ArcKnotHolderEntityEnd::knot_click(unsigned int state)
     auto ge = cast<SPGenericEllipse>(item);
     g_assert(ge != nullptr);
 
-    if (state & GDK_SHIFT_MASK) {
+    if (mod_trans_rounding_reset->active(state)) {
         ge->end = ge->start = 0;
         ge->updateRepr();
     }
@@ -1725,6 +1737,9 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+private:
+    Modifiers::Modifier *mod_trans_rounding_reset = Modifiers::Modifier::get(Modifiers::Type::TRANS_RESET_ROUNDING);
 };
 
 class StarKnotHolderEntity2 : public KnotHolderEntity {
@@ -1733,6 +1748,9 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+private:
+    Modifiers::Modifier *mod_trans_rounding_reset = Modifiers::Modifier::get(Modifiers::Type::TRANS_RESET_ROUNDING);
 };
 
 class StarKnotHolderEntityCenter : public KnotHolderEntity {
@@ -1845,7 +1863,7 @@ StarKnotHolderEntityCenter::knot_get() const
 }
 
 static void
-sp_star_knot_click(SPItem *item, unsigned int state)
+sp_star_knot_click(SPItem *item, unsigned int state, Modifiers::Modifier *mod_trans_rounding_reset)
 {
     auto star = cast<SPStar>(item);
     g_assert(star != nullptr);
@@ -1853,7 +1871,7 @@ sp_star_knot_click(SPItem *item, unsigned int state)
     if (state & GDK_ALT_MASK) {
         star->randomized = 0;
         star->updateRepr();
-    } else if (state & GDK_SHIFT_MASK) {
+    } else if (mod_trans_rounding_reset->active(state)) {
         star->rounded = 0;
         star->updateRepr();
     } else if (state & GDK_CONTROL_MASK) {
@@ -1865,13 +1883,13 @@ sp_star_knot_click(SPItem *item, unsigned int state)
 void
 StarKnotHolderEntity1::knot_click(unsigned int state)
 {
-    sp_star_knot_click(item, state);
+    sp_star_knot_click(item, state, mod_trans_rounding_reset);
 }
 
 void
 StarKnotHolderEntity2::knot_click(unsigned int state)
 {
-    sp_star_knot_click(item, state);
+    sp_star_knot_click(item, state, mod_trans_rounding_reset);
 }
 
 StarKnotHolder::StarKnotHolder(SPDesktop *desktop, SPItem *item)
@@ -1912,6 +1930,9 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+private:
+    Modifiers::Modifier *mod_trans_rounding_reset = Modifiers::Modifier::get(Modifiers::Type::TRANS_RESET_ROUNDING);
 };
 
 class SpiralKnotHolderEntityOuter : public KnotHolderEntity {
@@ -2109,7 +2130,7 @@ SpiralKnotHolderEntityInner::knot_click(unsigned int state)
     if (state & GDK_ALT_MASK) {
         spiral->exp = 1;
         spiral->updateRepr();
-    } else if (state & GDK_SHIFT_MASK) {
+    } else if (mod_trans_rounding_reset->active(state)) {
         spiral->t0 = 0;
         spiral->updateRepr();
     }
