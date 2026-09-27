@@ -81,8 +81,11 @@ endif()
 add_rendering_test(text-svg-glyph-custom FUZZ 0.3)
 
 # Cairo 1.18.4 and earlier have a deadlock issue.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(CAIRO REQUIRED cairo)
 if(${CAIRO_VERSION} VERSION_GREATER_EQUAL "1.18.5")
   add_rendering_test(color-font-test FUZZ 0.1)
 else()
   message(STATUS "Disabled color-font-test, need Cairo 1.18.5 or later")
+  message(STATUS "  Found cairo, version ${CAIRO_VERSION}")
 endif()
