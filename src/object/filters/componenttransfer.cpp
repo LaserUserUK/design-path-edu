@@ -19,19 +19,9 @@
 #include "componenttransfer-funcnode.h"              // for SPFeFuncNode
 #include "document.h"                                // for SPDocument
 
-#include "display/nr-filter-component-transfer.h"    // for FilterComponentT...
+#include "renderer/drawing-filters/component-transfer.h"
 #include "object/filters/sp-filter-primitive.h"      // for SPFilterPrimitive
 #include "object/sp-object.h"                        // for SPObject, SP_OBJ...
-
-namespace Inkscape {
-class DrawingItem;
-namespace Filters {
-class FilterPrimitive;
-} // namespace Filters
-namespace XML {
-class Node;
-} // namespace XML
-} // namespace Inkscape
 
 void SPFeComponentTransfer::build(SPDocument *document, Inkscape::XML::Node *repr)
 {
@@ -70,9 +60,9 @@ void SPFeComponentTransfer::modified(unsigned flags)
     }
 }
 
-std::unique_ptr<Inkscape::Filters::FilterPrimitive> SPFeComponentTransfer::build_renderer(Inkscape::DrawingItem*) const
+std::unique_ptr<Inkscape::Renderer::DrawingFilter::Primitive> SPFeComponentTransfer::build_renderer(Inkscape::Renderer::DrawingItem*) const
 {
-    auto componenttransfer = std::make_unique<Inkscape::Filters::FilterComponentTransfer>();
+    auto componenttransfer = std::make_unique<Inkscape::Renderer::DrawingFilter::ComponentTransfer>();
     build_renderer_common(componenttransfer.get());
 
     bool set[4] = {false, false, false, false};
@@ -82,16 +72,9 @@ std::unique_ptr<Inkscape::Filters::FilterPrimitive> SPFeComponentTransfer::build
             continue;
         }
 
-        int i;
-        switch (funcNode->channel) {
-        case SPFeFuncNode::R: i = 0; break;
-        case SPFeFuncNode::G: i = 1; break;
-        case SPFeFuncNode::B: i = 2; break;
-        case SPFeFuncNode::A: i = 3; break;
-        default:
-            g_warning("Unrecognized channel for component transfer.");
-            goto nested_break;
-        }
+        int i = (int)funcNode->channel;
+        if (i >= 4) i-=4; // cmyk offset
+        if (i >= 5) i-=5; // hsl offset
 
         componenttransfer->type[i] = funcNode->type;
         componenttransfer->tableValues[i] = funcNode->tableValues;
@@ -103,12 +86,11 @@ std::unique_ptr<Inkscape::Filters::FilterPrimitive> SPFeComponentTransfer::build
 
         set[i] = true;
     }
-nested_break:;
 
     // Set any types not explicitly set to the identity transform
     for (int i = 0; i < 4; i++) {
         if (!set[i]) {
-            componenttransfer->type[i] = Inkscape::Filters::COMPONENTTRANSFER_TYPE_IDENTITY;
+            componenttransfer->type[i] = Inkscape::Renderer::DrawingFilter::IDENTITY;
         }
     }
 

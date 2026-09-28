@@ -26,6 +26,9 @@
 #include "preferences.h"
 #include "pattern-manager.h"
 #include "pattern-manipulation.h"
+#include "renderer/context.h"
+#include "renderer/surface.h"
+#include "renderer/surface-texture.h"
 #include "ui/builder-utils.h"
 #include "ui/monitor.h"
 #include "ui/util.h"
@@ -229,7 +232,7 @@ void PatternEditor::bind_store(Gtk::FlowBox& list, PatternStore& pat) {
 
     list.bind_list_store(pat.store.get_store(), [&pat, this](const Glib::RefPtr<PatternItem>& item){
         auto const box = Gtk::make_managed<Box>(Gtk::Orientation::VERTICAL);
-        auto const image = Gtk::make_managed<Gtk::Image>(to_texture(item->pix));
+        auto const image = Gtk::make_managed<Gtk::Image>(Renderer::build_texture(item->pix));
         image->set_size_request(_tile_size, _tile_size);
         image->set_pixel_size(_tile_size);
         box->append(*image);
@@ -350,7 +353,7 @@ Glib::RefPtr<PatternItem> create_pattern_item(PatternManager& manager, SPPaintSe
     auto item = manager.get_item(paint);
     if (item && scale > 0) {
         // check if any existing cached image needs to be regenerated
-        if (!item->pix || tile_size != item->pix->get_width() || scale != item->pix->get_device_scale()) {
+        if (!item->pix || tile_size != item->pix->width() || scale != item->pix->getDeviceScale()) {
             item->pix = manager.get_image(paint, tile_size, tile_size, scale);
         }
     }
@@ -534,7 +537,7 @@ void PatternEditor::set_active(Gtk::FlowBox& gallery, PatternStore& pat, Glib::R
                             for_each_descendant(*box, [&](Widget &widget){
                                 if (auto const image = dynamic_cast<Gtk::Image *>(&widget)) {
                                     image->set_pixel_size(_tile_size);
-                                    image->set(to_texture(item->pix));
+                                    image->set(Renderer::build_texture(item->pix));
                                     return ForEachResult::_break;
                                 }
                                 return ForEachResult::_continue;
@@ -668,7 +671,7 @@ void PatternEditor::update_pattern_tiles() {
     regenerate_tile_images(_manager, _stock_pattern_store, _tile_size, device_scale, nullptr);
 }
 
-void PatternEditor::draw_preview(const Cairo::RefPtr<Cairo::Context>& ctx, int width, int height) {
+void PatternEditor::draw_preview(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
     if (!width || !height || _current_pattern.link_id.empty() || !_current_document) return;
 
     auto link_pattern = cast<SPPaintServer>(_current_document->getObjectById(_current_pattern.link_id.raw()));
@@ -678,8 +681,9 @@ void PatternEditor::draw_preview(const Cairo::RefPtr<Cairo::Context>& ctx, int w
     // use white for checkerboard since most stock patterns are black
     unsigned int background = 0xffffffff;
     auto surface = _manager.get_preview(link_pattern, width, height, background, device_scale);
-    ctx->set_source(surface, 0, 0);
-    ctx->paint();
+    auto ctx = Renderer::Context(cr);
+    ctx.setSource(*surface);
+    ctx.paint();
 }
 
 void PatternEditor::on_map() {
