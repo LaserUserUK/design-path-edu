@@ -724,6 +724,19 @@ void PathManipulator::deleteNodes(NodeDeleteMode delete_mode)
             continue;
         }
 
+        if (sp->closed() && num_unselected == 1) {
+            // Special case for deleting all but one node in a closed path, to avoid a troublesome
+            // empty path.
+            NodeList::iterator keep = sp->begin();
+            while (keep->selected()) {
+                keep = keep.next();
+            }
+
+            _deleteRest(keep);
+            ++i;
+            continue;
+        }
+
         // In closed paths, start from an unselected node - otherwise we might start in the middle
         // of a selected stretch and the resulting bezier fit would be suboptimal
         NodeList::iterator sel_beg = sp->begin(), sel_end;
@@ -757,6 +770,41 @@ double get_angle(const Geom::Point& p0, const Geom::Point& p1, const Geom::Point
     auto a1 = atan2(d1);
     auto a2 = atan2(d2);
     return a1 - a2;
+}
+
+/**
+ * Delete all nodes except for one in a closed subpath. Ensures that the resulting single-node path
+ * is not empty, by attaching a bezier curve to it if necessary.
+ * The given range can cross the beginning of the subpath in closed subpaths.
+ * @param keep       The node not to delete.
+ */
+void PathManipulator::_deleteRest(NodeList::iterator keep)
+{
+    NodeList::iterator cur = keep.next();
+    if (!cur) {
+        // This function should only be called with an iterator on a closed path, where there is
+        // always a next node.
+        return;
+    }
+
+    Geom::Point first_node_position = cur->position();
+    Geom::Point last_node_position;
+
+    NodeList &nl = keep->nodeList();
+    while (cur && cur != keep) {
+        last_node_position = cur->position();
+        NodeList::iterator next = cur.next();
+        nl.erase(cur);
+        cur = next;
+    }
+
+    // Transform a bare point into a teardrop-shaped path.
+    if (keep->front()->isDegenerate()) {
+        keep->front()->setPosition(first_node_position);
+    }
+    if (keep->back()->isDegenerate()) {
+        keep->back()->setPosition(last_node_position);
+    }
 }
 
 /**
@@ -1745,8 +1793,13 @@ bool PathManipulator::_nodeClicked(Node *n, ButtonReleaseEvent const &event, boo
         NodeList &nl = iter->nodeList();
 
         if (nl.size() <= 1 || (nl.size() <= 2 && !nl.closed())) {
-            // Removing last node of closed path - delete it
+            // Removing last node of closed path, or one of last two in of an open path - delete
+            // the whole path
             nl.kill();
+        } else if (nl.size() == 2 && nl.closed()) {
+            // Removing one of two nodes in a closed path - special case deletion to avoid a single
+            // node with an empty path.
+            _deleteRest(iter.next());
         } else {
             // In other cases, delete the node under cursor
             _deleteStretch(iter, iter.next(), NodeDeleteMode::curve_fit);
