@@ -38,8 +38,9 @@ void CairoGraphics::recreate_store(Geom::IntPoint const &dims)
 
     auto make_surface = [&, this] {
         // Should we be asking for a wider gamut for the screen here?
-        static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
-        return std::make_shared<Renderer::Surface>(surface_size, scale_factor, srgb);
+        //static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
+        // Using INT surface as float is extremely slow
+        return std::make_shared<Renderer::Surface>(surface_size, scale_factor);
     };
 
     // Recreate the store surface.
@@ -81,8 +82,8 @@ void CairoGraphics::shift_store(Fragment const &dest)
     assert(reuse_rect); // Should not be called if there is no overlap.
 
     auto make_surface = [&, this] {
-        static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
-        return std::make_shared<Renderer::Surface>(surface_size, scale_factor, srgb);
+        //static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
+        return std::make_shared<Renderer::Surface>(surface_size, scale_factor);
     };
 
     // Create the new store surface.
@@ -173,8 +174,8 @@ void CairoGraphics::snapshot_combine(Fragment const &dest)
     auto content_size = dest.rect.dimensions() * scale_factor;
 
     auto make_surface = [&] {
-        static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
-        return std::make_shared<Renderer::Surface>(content_size, scale_factor, srgb);
+        //static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
+        return std::make_shared<Renderer::Surface>(content_size, scale_factor);
     };
 
     CairoFragment fragment;
@@ -211,9 +212,9 @@ void CairoGraphics::snapshot_combine(Fragment const &dest)
 std::shared_ptr<Renderer::Surface> CairoGraphics::request_tile_surface(Geom::IntRect const &rect, bool /*nogl*/)
 {
     // Create temporary surface, isolated from store.
-    static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
+    //static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
     Geom::IntRect scaled_rect = (Geom::Rect(rect) * Geom::Scale(scale_factor)).roundOutwards();
-    return std::make_shared<Renderer::Surface>(scaled_rect.dimensions(), (double)scale_factor, srgb);
+    return std::make_shared<Renderer::Surface>(scaled_rect.dimensions(), (double)scale_factor);
 }
 
 void CairoGraphics::draw_tile(Fragment const &fragment, std::shared_ptr<Renderer::Surface> surface, std::shared_ptr<Renderer::Surface> outline_surface)

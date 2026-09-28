@@ -102,7 +102,7 @@ void CanvasItemCtrl::_dump()
     }
 
     static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
-    auto surface = std::make_shared<Renderer::Surface>(Geom::IntPoint((types.size() + 1) * step * scale, (h + 1) * step * scale), 1.0, srgb);
+    auto surface = std::make_shared<Renderer::Surface>(Geom::IntPoint((types.size() + 1) * step * scale, (h + 1) * step * scale), 1.0);
     Geom::Point d = surface->dimensions();
     auto buf = CanvasItemBuffer{
         .rect = Geom::IntRect(0, 0, d[Geom::X], d[Geom::Y]),

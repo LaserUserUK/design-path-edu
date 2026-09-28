@@ -455,8 +455,8 @@ static std::shared_ptr<Renderer::Surface> sp_icon_doc_icon(SPDocument *doc, Rend
     }
 
     // Render.
-    static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
-    auto surface = std::make_shared<Renderer::Surface>(Geom::IntPoint(psize, psize), 1.0, srgb);
+    //static auto srgb = Colors::Manager::get().find(Colors::Space::Type::RGB);
+    auto surface = std::make_shared<Renderer::Surface>(Geom::IntPoint(psize, psize), 1.0);
     auto dc = Renderer::Context(*surface);
     dc.transform(Geom::Translate(-ua.min()));
     dc.paint(doc->getPageManager().getDefaultBackgroundColor());

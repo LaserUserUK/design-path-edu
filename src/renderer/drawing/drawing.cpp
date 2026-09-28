@@ -185,7 +185,7 @@ void Drawing::setDithering(bool use_dithering)
 void Drawing::setCacheBudget(size_t bytes)
 {
     defer([=, this] {
-        _cache_budget = bytes;
+        _cache_budget = 0; // bytes; // CACHING DISABLED
         _pickItemsForCaching();
     });
 }
