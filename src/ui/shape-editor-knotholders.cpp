@@ -1456,6 +1456,11 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+    std::string get_mod_label() const { return mod_trans_confine->get_label(); }
+
+private:
+    Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
 };
 
 class ArcKnotHolderEntityRY : public KnotHolderEntity {
@@ -1464,6 +1469,11 @@ public:
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_click(unsigned int state) override;
+
+    std::string get_mod_label() const { return mod_trans_confine->get_label(); }
+
+private:
+    Modifiers::Modifier *mod_trans_confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE);
 };
 
 class ArcKnotHolderEntityCenter : public KnotHolderEntity {
@@ -1610,7 +1620,7 @@ ArcKnotHolderEntityRX::knot_set(Geom::Point const &p, Geom::Point const &/*origi
 
     ge->rx = fabs( ge->cx.computed - s[Geom::X] );
 
-    if ( state & GDK_CONTROL_MASK ) {
+    if (mod_trans_confine->active(state)) {
         ge->ry = ge->rx.computed;
     }
 
@@ -1632,7 +1642,7 @@ ArcKnotHolderEntityRX::knot_click(unsigned int state)
     auto ge = cast<SPGenericEllipse>(item);
     g_assert(ge != nullptr);
 
-    if (state & GDK_CONTROL_MASK) {
+    if (mod_trans_confine->active(state)) {
         ge->ry = ge->rx.computed;
         ge->updateRepr();
     }
@@ -1648,7 +1658,7 @@ ArcKnotHolderEntityRY::knot_set(Geom::Point const &p, Geom::Point const &/*origi
 
     ge->ry = fabs( ge->cy.computed - s[Geom::Y] );
 
-    if ( state & GDK_CONTROL_MASK ) {
+    if (mod_trans_confine->active(state)) {
         ge->rx = ge->ry.computed;
     }
 
@@ -1670,7 +1680,7 @@ ArcKnotHolderEntityRY::knot_click(unsigned int state)
     auto ge = cast<SPGenericEllipse>(item);
     g_assert(ge != nullptr);
 
-    if (state & GDK_CONTROL_MASK) {
+    if (mod_trans_confine->active(state)) {
         ge->rx = ge->ry.computed;
         ge->updateRepr();
     }
@@ -1709,10 +1719,12 @@ ArcKnotHolder::ArcKnotHolder(SPDesktop *desktop, SPItem *item)
     ArcKnotHolderEntityCenter *entity_center = new ArcKnotHolderEntityCenter();
 
     entity_rx->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Arc:rx",
-                      _("Adjust ellipse <b>width</b>, with <b>Ctrl</b> to make circle"));
+                      _(("Adjust ellipse <b>width</b>, with <b>" + entity_rx->get_mod_label() + "</b> to make circle")
+                             .c_str()));
 
     entity_ry->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Arc:ry",
-                      _("Adjust ellipse <b>height</b>, with <b>Ctrl</b> to make circle"));
+                      _(("Adjust ellipse <b>height</b>, with <b>" + entity_ry->get_mod_label() + "</b> to make circle")
+                             .c_str()));
 
     entity_start->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_ROTATE, "Arc:start",
                          _("Position the <b>start point</b> of the arc or segment; with <b>Shift</b> to move "
