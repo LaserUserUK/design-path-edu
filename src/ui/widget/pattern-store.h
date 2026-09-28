@@ -17,13 +17,17 @@
 
 class SPDocument;
 
+namespace Inkscape::Renderer {
+class Surface;
+}
+
 namespace Inkscape::UI::Widget {
 
 // pattern parameters
 class PatternItem : public Glib::Object
 {
 public:
-    Cairo::RefPtr<Cairo::ImageSurface> pix;
+    std::shared_ptr<Renderer::Surface> pix;
     std::string id;
     std::string label;
     bool stock = false;

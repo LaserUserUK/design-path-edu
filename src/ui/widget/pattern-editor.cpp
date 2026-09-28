@@ -26,6 +26,8 @@
 #include "preferences.h"
 #include "pattern-manager.h"
 #include "pattern-manipulation.h"
+#include "renderer/context.h"
+#include "renderer/surface.h"
 #include "renderer/surface-texture.h"
 #include "ui/builder-utils.h"
 #include "ui/monitor.h"
@@ -351,7 +353,7 @@ Glib::RefPtr<PatternItem> create_pattern_item(PatternManager& manager, SPPaintSe
     auto item = manager.get_item(paint);
     if (item && scale > 0) {
         // check if any existing cached image needs to be regenerated
-        if (!item->pix || tile_size != item->pix->get_width() || scale != item->pix->get_device_scale()) {
+        if (!item->pix || tile_size != item->pix->width() || scale != item->pix->getDeviceScale()) {
             item->pix = manager.get_image(paint, tile_size, tile_size, scale);
         }
     }
@@ -669,7 +671,7 @@ void PatternEditor::update_pattern_tiles() {
     regenerate_tile_images(_manager, _stock_pattern_store, _tile_size, device_scale, nullptr);
 }
 
-void PatternEditor::draw_preview(const Cairo::RefPtr<Cairo::Context>& ctx, int width, int height) {
+void PatternEditor::draw_preview(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
     if (!width || !height || _current_pattern.link_id.empty() || !_current_document) return;
 
     auto link_pattern = cast<SPPaintServer>(_current_document->getObjectById(_current_pattern.link_id.raw()));
@@ -679,8 +681,9 @@ void PatternEditor::draw_preview(const Cairo::RefPtr<Cairo::Context>& ctx, int w
     // use white for checkerboard since most stock patterns are black
     unsigned int background = 0xffffffff;
     auto surface = _manager.get_preview(link_pattern, width, height, background, device_scale);
-    ctx->set_source(surface, 0, 0);
-    ctx->paint();
+    auto ctx = Renderer::Context(cr);
+    ctx.setSource(*surface);
+    ctx.paint();
 }
 
 void PatternEditor::on_map() {

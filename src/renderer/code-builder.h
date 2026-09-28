@@ -268,8 +268,8 @@ public:
         } else if constexpr (std::is_same<T, SPGradientMesh>::value) {
             auto s2 = InlineObject<false, true>("SPGradientMesh");
             s2.named("built", true);
-            s2.named("rows", arg.rows);
-            s2.named("cols", arg.cols);
+            // TODO s2.named("rows", arg.rows);
+            // TODO s2.named("cols", arg.cols);
             // mesh gradients that use bicubics will produce *thousands* of patches
             // and will crash the compiler. We can't handle this as data input like this.
             if (arg.patches.size() > 0 && arg.patches.size() <= 6) {
