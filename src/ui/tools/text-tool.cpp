@@ -190,8 +190,8 @@ bool TextTool::item_handler(SPItem *item, CanvasEvent const &event)
             }
             auto const n_press = event.num_press % 3; // cycle through selection modes on repeated clicking
             if (n_press == 1) {
-                // this var allow too much lees subbselection queries
-                // reducing it to cursor iteracion, mouseup and down
+                // this var allow too much less subbselection queries
+                // reducing it to cursor interaction, mouseup and down
                 // find out clicked item, disregarding groups
                 auto const item_ungrouped = _desktop->getItemAtPoint(event.pos, true);
                 if (is<SPText>(item_ungrouped) || is<SPFlowtext>(item_ungrouped)) {

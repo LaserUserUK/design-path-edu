@@ -191,7 +191,7 @@ notebook.blink > header > tabs > tab:checked {
 }
 
 
-/* atribute dialog popup size */
+/* attribute dialog popup size */
 .attrpop textview {
     font-size: 1em;
 }
