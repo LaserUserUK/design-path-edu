@@ -49,7 +49,7 @@ static Geom::Path::size_type size_nondegenerate(Geom::Path const &path) {
     Geom::Path::size_type retval = path.size_default();
     // retval == 0 means the path only contains a closing line
     if (retval > 0) {
-        const Geom::Curve &closingline = path.back_closed();
+        Geom::Curve const &closingline = path.back_closed();
         // the closing line segment is always of type
         // Geom::LineSegment.
         if (are_near(closingline.initialPoint(), closingline.finalPoint())) {
