@@ -1337,6 +1337,7 @@ void PathManipulator::_createControlPointsFromGeometry()
 
     // sanitize pathvector and store it in SPCurve,
     // so that _updateDragPoint doesn't crash on paths with naked movetos
+    // note that close paths cannot have naked movetos - they have at least a degenerate closing path
     Geom::PathVector pathv;
     if (_is_bspline) {
         pathv = pathv_to_cubicbezier(_spcurve, false);
@@ -1347,7 +1348,7 @@ void PathManipulator::_createControlPointsFromGeometry()
         // NOTE: this utilizes the fact that Geom::PathVector is an std::vector.
         // When we erase an element, the next one slides into position,
         // so we do not increment the iterator.
-        if (i->empty()) {
+        if (i->empty() && !i->closed()) {
             i = pathv.erase(i);
         } else {
             ++i;
@@ -1360,7 +1361,7 @@ void PathManipulator::_createControlPointsFromGeometry()
 
     pathv *= _getTransform();
 
-    // in this loop, we know that there are no zero-segment subpaths
+    // in this loop, we know that there are no zero-segment open subpaths
     for (auto & pit : pathv) {
         // prepare new subpath
         SubpathPtr subpath(new NodeList(_subpaths));
@@ -1564,7 +1565,7 @@ void PathManipulator::_createGeometryFromControlPoints(bool alert_LPE)
         // NOTE: this utilizes the fact that Geom::PathVector is an std::vector.
         // When we erase an element, the next one slides into position,
         // so we do not increment the iterator even though it is theoretically invalidated.
-        if (i->empty()) {
+        if (i->empty() && !i->closed()) {
             i = pathv.erase(i);
         } else {
             ++i;
