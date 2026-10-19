@@ -210,7 +210,7 @@ void show_about()
     auto license      = &get_widget<Gtk::Label>   (builder, "license-text");
 
     auto text = Inkscape::inkscape_version();
-    version_lbl->set_label(text);
+    version_lbl->set_label(text + "\nDesign Path EDU (development build)");
     version->signal_clicked().connect(
         sigc::bind(&copy, version, label, std::move(text)));
 
