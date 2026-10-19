@@ -72,3 +72,15 @@ tags
 
 # YCM code completer
 .ycm_*
+
+# LaserUser local/security files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.*
+secrets.*
+.local/
